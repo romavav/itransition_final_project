@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
-import { commentsCollection, db } from './firebase';
+import { db } from './firebase';
 import './Dashboard.css';
 
 
@@ -13,12 +13,8 @@ const Dashboard = () => {
   const [uploadedImageUrl, setUploadedImageUrl] = useState('');
   const [editingCollection, setEditingCollection] = useState({ name: '', description: '', category: '' });
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [collections, setCollections] = useState([
-    { id: 1, name: 'Collection 1', description: 'Description 1', likes: 0 },
-    { id: 2, name: 'Collection 2', description: 'Description 2', likes: 0 },
-  ]);
+  const [collections, setCollections] = useState([]);
   const [userLiked, setUserLiked] = useState(false);
-  const [comments, setComments] = useState({});
   const [newComment, setNewComment] = useState('');
   const [showModal, setShowModal] = useState(false);
 
@@ -27,16 +23,18 @@ const Dashboard = () => {
     const loadCollections = async () => {
       const collectionsRef = collection(db, 'collections');
       const snapshot = await getDocs(collectionsRef);
-      const collectionsData = snapshot.docs.map(async (collectionDoc) => {
+      const collectionsData = [];
+
+      for (const collectionDoc of snapshot.docs) {
         const commentsRef = collection(collectionDoc.ref, 'comments');
         const commentsSnapshot = await getDocs(commentsRef);
-        const commentsData = commentsSnapshot.docs.map((commentDoc) => commentDoc.data());
+        const commentsData = commentsSnapshot.docs.map(commentDoc => commentDoc.data());
 
-        return { id: collectionDoc.id, ...collectionDoc.data(), comments: commentsData };
-      });
+        const collectionData = { id: collectionDoc.id, ...collectionDoc.data(), comments: commentsData };
+        collectionsData.push(collectionData);
+      }
 
-      const collectionsWithComments = await Promise.all(collectionsData);
-      setCollections(collectionsWithComments);
+      setCollections(collectionsData);
     };
 
     loadCollections();
@@ -49,6 +47,18 @@ const Dashboard = () => {
       category: newCollectionCategory,
       image: uploadedImageUrl,
       likes: 0,
+      comments: [
+        {
+          id: 'comment-1',
+          text: 'Текст комментария 1',
+          createdAt: 'Дата создания комментария',
+        },
+        {
+          id: 'comment-2',
+          text: 'Текст комментария 2',
+          createdAt: 'Дата создания комментария',
+        },
+      ]
     };
 
     const docRef = await addDoc(collection(db, 'collections'), newCollection);
@@ -62,7 +72,7 @@ const Dashboard = () => {
     setUploadedImageUrl('');
   };
 
-  const addComment = async (collectionId) => {
+  const addComment = async (collectionId, newComment) => {
     if (newComment.trim() === '') {
       return;
     }
@@ -74,17 +84,28 @@ const Dashboard = () => {
         collectionId: collectionId,
       };
 
+      const commentsCollection = collection(db, 'collections', collectionId, 'comments');
       const docRef = await addDoc(commentsCollection, newCommentData);
       console.log("Комментарий успешно добавлен с ID: ", docRef.id);
+
+      // Обновление состояния, чтобы отразить новый комментарий
+      setCollections(prevCollections =>
+        prevCollections.map(collection => {
+          if (collection.id === collectionId) {
+            return {
+              ...collection,
+              comments: [...collection.comments, newCommentData],
+            };
+          }
+          return collection;
+        })
+      );
 
       setNewComment('');
     } catch (error) {
       console.error("Ошибка при добавлении комментария: ", error);
     }
   };
-
-
-
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -356,18 +377,18 @@ const Dashboard = () => {
                 {showModal && (
                   <div className="modal">
                     <div className="modal-content">
-                      <button className='btn-close' data-bs-dismiss='modal' aria-label='Закрыть' onClick={toggleModal}>
-                      </button>
+                      <button className='btn-close' data-bs-dismiss='modal' aria-label='Закрыть' onClick={toggleModal}></button>
                       <h2>Отзывы</h2>
 
                       {/* Отображение комментариев */}
                       <div className="mt-4">
-                        {comments[collection.id] && comments[collection.id].map((comment, index) => (
+                        {collection && collection.comments && collection.comments.map((comment, index) => (
                           <div key={index} className="bg-light p-3 mb-2">
-                            <p className="m-0">{comment}</p>
+                            <p className="m-0">{comment.text}</p>
                           </div>
                         ))}
                       </div>
+
                       <form onSubmit={(e) => {
                         e.preventDefault();
                         const comment = e.target.elements.comment.value;
@@ -383,7 +404,7 @@ const Dashboard = () => {
                           value={newComment}
                           onChange={(e) => setNewComment(e.target.value)}
                         />
-                        <button type="submit" className="btn btn-primary" onClick={() => addComment(collection.id)}>
+                        <button type="submit" className="btn btn-primary">
                           Отправить
                         </button>
                       </form>
