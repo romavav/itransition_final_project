@@ -1,0 +1,151 @@
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  position: relative;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 5px;
+}
+
+.btn-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.modal-content-open {
+  width: 80%;
+}
+
+.modal-content button {
+  margin-bottom: 10px;
+}
+
+.modal-content input {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.button-heart {
+  background-color: transparent;
+  color: inherit;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  outline: none;
+}
+
+.comments-icon {
+  font-size: 15.5px;
+  cursor: pointer;
+  color: #0d6efd;
+  padding-top: 3px;
+}
+
+.modal-content.custom-modal {
+  position: relative;
+  width: 40%;
+  max-height: 80vh;
+  padding: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-content.custom-modal .btn-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.comments-container {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 15px; /* добавим отступ справа */
+}
+
+.form-control,
+.btn {
+  font-size: 1em;
+}
+
+@media (max-width: 768px) {
+  .modal-content.custom-modal {
+    width: 95%;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.comment-item {
+  display: flex;
+  flex-direction: column;
+  animation: fade-in 0.5s ease-in-out;
+}
+
+.comment-item .d-flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.comment-item .timestamp {
+  font-size: 0.9em;
+  color: gray;
+}
+
+.comment-item .comment-text {
+  cursor: pointer; /* Указатель при наведении */
+  flex-grow: 1; /* Занимать все доступное пространство */
+  margin: 0; /* Убираем отступы */
+  padding: 3px; /* Добавим отступы для удобства */
+}
+
+.comment-item .comment-text:hover {
+  background-color: #f8d7da; /* Background при наведении */
+  color: #721c24; /* Цвет текста при наведении */
+}
+
+.comment-item .delete-icon {
+  display: none; /* Скрываем иконку по умолчанию */
+  margin-left: 10px;
+  cursor: pointer;
+  color: #721c24; /* Цвет иконки */
+}
+
+.comment-item .d-flex:hover .delete-icon {
+  display: inline; /* Показываем иконку при наведении */
+}
+
+.comment-item .d-flex:hover .comment-text {
+  background-color: #f8d7da; /* Background при наведении */
+  color: #721c24; /* Цвет текста при наведении */
+}
+
+.comments-form {
+  display: flex;
+}
+
+.comments-form input {
+  margin-right: 5px;
+}

@@ -5,7 +5,6 @@ import './login.css'
 import { useNavigate } from 'react-router-dom';
 
 export const SignUp = () => {
-
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [copyPassword, setCopyPassword] = useState('');
@@ -15,20 +14,30 @@ export const SignUp = () => {
 
     function register(e) {
         e.preventDefault();
+
+        // Проверка на минимальную длину пароля
+        // if (password.length < 6) {
+        //     setError('Пароль должен содержать не менее 6 символов!');
+        //     return;
+        // }
+
+        // Проверка на совпадение паролей
         if (copyPassword !== password) {
-            setError('Пароль не совпадает!')
-            return
+            setError('Пароль не совпадает!');
+            return;
         }
+
         createUserWithEmailAndPassword(auth, email, password)
             .then((user) => {
                 console.log(user);
                 setError("");
                 setEmail("");
                 setCopyPassword("");
-                setCopyPassword("");
+                setPassword(""); // Исправлено: сброс значения пароля
                 navigate('/login');
             }).catch((error) => {
-                console.log(error)
+                console.log(error);
+                setError(error.message); // Устанавливаем сообщение об ошибке
             });
     }
 
